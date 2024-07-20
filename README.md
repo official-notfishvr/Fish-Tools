@@ -21,7 +21,7 @@ To use Fish Tools, you need to include the Fish Console Library in your project:
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/Fish-Tools.git
+   git clone https://github.com/official-notfishvr/Fish-Tools.git
    ```
 
 2. Navigate to the project directory:
