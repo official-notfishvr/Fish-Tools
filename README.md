@@ -1,14 +1,31 @@
 # Fish-Tools
+
 Fish Tools has alot of tools you can use such as Anti Dump, Double Counter Bypass and more
 
-# Features
+## Features
 
-- Double Counter Bypass
-- File Clean Up
-- Costura Decompressor
-- Anti Dump
-- Hide File
+- **Double Counter Bypass**: Bypass double counters with ease.
+- **File Clean Up**: clean up VS or Node Modules.
+- **Costura Decompressor**: Decompress Costura-packed assemblies.
+- **Anti Dump**: Protect your code from being dumped.
+- **Hide File**: Hide files securely.
 
-you need:
-https://github.com/official-notfishvr/Fish-Console-Lib
+## Requirements
 
+To use Fish Tools, you need to include the Fish Console Library in your project:
+
+[Fish Console Library](https://github.com/official-notfishvr/Fish-Console-Lib)
+
+## Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/yourusername/Fish-Tools.git
+   ```
+
+2. Navigate to the project directory:
+
+   ```bash
+   cd Fish-Tools
+   ```
