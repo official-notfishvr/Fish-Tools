@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
+    <RootNamespace>Fish_Tools</RootNamespace>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Platforms>AnyCPU;x64</Platforms>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AsmResolver" Version="5.5.1" />
+    <PackageReference Include="AsmResolver.DotNet" Version="5.5.1" />
+    <PackageReference Include="Discord.Anarchy" Version="0.8.3.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Fish Console Lib">
+      <HintPath>..\..\Outher FIles\My FIles\Fish Console Lib\ClassLibrary1\bin\Debug\Fish Console Lib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
