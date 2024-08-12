@@ -4,16 +4,20 @@ Fish Tools has alot of tools you can use such as Anti Dump, Double Counter Bypas
 
 ## Features
 
+## Features
+
 - **Bypass Tools:**
- - **Double Counter Bypass**: Bypass double counters with ease.
- - **Linkvertise Bypass**: Bypass Linkvertise with ease.
+  - **Double Counter Bypass:** Easily bypass double counters.
+  - **Linkvertise Bypass:** Seamlessly bypass Linkvertise.
+
 - **File Management Tools:**
- - **File Clean Up**: clean up VS or Node Modules.
- - **Costura Decompressor**: Decompress Costura-packed assemblies.
- - **Anti Dump**: Protect your code from being dumped.
- - **Hide File**: Hide files securely.
+  - **File Clean Up:** Clean up Visual Studio or Node.js modules.
+  - **Costura Decompressor:** Decompress Costura-packed assemblies.
+  - **Anti Dump:** Protect your code from being dumped.
+  - **Hide File:** Securely hide files.
+
 - **Discord Tools:**
- - **Scrape Groups**: it Shows you all of the Groups your in.
+  - **Scrape Groups:** Display all the groups you're in.
 
 ## Requirements
 
