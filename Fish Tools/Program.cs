@@ -84,7 +84,7 @@ namespace Fish_Tools
                             Console.Write("-> ");
                             string url = Console.ReadLine();
                             LinkvertiseBypass linkvertise = new LinkvertiseBypass();
-                            linkvertise.Bypass(new Uri("https://linkvertise.com/106636/XRayUpdate"), Logger);
+                            linkvertise.Bypass(new Uri(url), Logger);
                             Console.ReadKey();
                             break;
                         case ConsoleKey.D0:
