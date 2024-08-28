@@ -1,4 +1,10 @@
-﻿using System.Diagnostics;
+﻿/*
+------------------------------------------------------------
+Made By notfishvr
+github: https://github.com/official-notfishvr/Fish-Tools
+------------------------------------------------------------
+*/
+using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Net;
 using System.Text.Json;

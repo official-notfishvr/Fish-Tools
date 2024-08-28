@@ -8,19 +8,58 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <Platforms>AnyCPU;x64</Platforms>
-    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <PackAsTool>True</PackAsTool>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <PlatformTarget>x64</PlatformTarget>
+    <StartupObject>Fish_Tools.Program</StartupObject>
+    <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>none</DebugType>
+    <Optimize>False</Optimize>
+    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DebugType>none</DebugType>
+    <Optimize>False</Optimize>
+    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+    <Optimize>True</Optimize>
+    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DebugType>none</DebugType>
+    <Optimize>True</Optimize>
+    <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AsmResolver" Version="5.5.1" />
     <PackageReference Include="AsmResolver.DotNet" Version="5.5.1" />
     <PackageReference Include="Discord.Anarchy" Version="0.8.3.2" />
+    <PackageReference Include="Leaf.xNet" Version="5.2.10" />
+    <PackageReference Include="MegaApiClient" Version="1.10.4" />
+    <PackageReference Include="SteamKit2" Version="2.5.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Extreme.Net">
+      <HintPath>..\Dependencies\Extreme.Net.dll</HintPath>
+    </Reference>
     <Reference Include="Fish Console Lib">
-      <HintPath>..\..\Outher FIles\My FIles\Fish Console Lib\ClassLibrary1\bin\Debug\Fish Console Lib.dll</HintPath>
+      <HintPath>..\Dependencies\Fish Console Lib.dll</HintPath>
     </Reference>
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="for %25%25f in (&quot;$(TargetDir)*&quot;) do if /I not &quot;%25%25~nxf&quot;==&quot;config.json&quot; xcopy &quot;%25%25f&quot; &quot;$(SolutionDir)bin\&quot; /Y /E /I" />
+  </Target>
 
 </Project>

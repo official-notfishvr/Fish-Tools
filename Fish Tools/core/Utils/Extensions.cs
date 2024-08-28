@@ -1,5 +1,10 @@
-﻿using System.IO.Compression;
-using System.IO;
+﻿/*
+------------------------------------------------------------
+Made By notfishvr
+github: https://github.com/official-notfishvr/Fish-Tools
+------------------------------------------------------------
+*/
+using System.IO.Compression;
 
 namespace Fish_Tools.core.Utils
 {

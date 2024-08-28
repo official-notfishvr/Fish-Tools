@@ -1,7 +1,11 @@
-﻿using AsmResolver.DotNet;
+﻿/*
+------------------------------------------------------------
+Made By notfishvr
+github: https://github.com/official-notfishvr/Fish-Tools
+------------------------------------------------------------
+*/
+using AsmResolver.DotNet;
 using Fish_Tools.core.Utils;
-using System.Collections.Generic;
-using System.IO;
 
 namespace Fish_Tools.core.FileManagementTools
 {

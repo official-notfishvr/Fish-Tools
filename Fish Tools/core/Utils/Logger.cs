@@ -1,5 +1,9 @@
-﻿using System;
-using System.Drawing;
+﻿/*
+------------------------------------------------------------
+Made By notfishvr
+github: https://github.com/official-notfishvr/Fish-Tools
+------------------------------------------------------------
+*/
 using Console = ConsoleLib.Console;
 
 namespace Fish_Tools.core.Utils

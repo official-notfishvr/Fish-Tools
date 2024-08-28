@@ -1,9 +1,17 @@
+/*
+------------------------------------------------------------
+Made By notfishvr
+github: https://github.com/official-notfishvr/Fish-Tools
+------------------------------------------------------------
+*/
 using Fish_Tools.core.Utils;
 using AsmResolver.DotNet;
 using System.Runtime.InteropServices;
 using Fish_Tools.core.FileManagementTools;
 using Fish_Tools.core.BypassTools;
 using Fish_Tools.core.DiscordTools;
+using Fish_Tools.core.MiscTools;
+using Fish_Tools.core.MiscTools.AccountChecker;
 
 namespace Fish_Tools
 {
@@ -12,6 +20,8 @@ namespace Fish_Tools
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool AllocConsole();
+
+        public static bool ApplicationConfigurationInitialize = false;
 
 
         /// <summary>
@@ -29,6 +39,11 @@ namespace Fish_Tools
         }
         public static void MainMenu()
         {
+            string dataDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
+            if (!Directory.Exists(dataDirectory)) { Directory.CreateDirectory(dataDirectory); }
+            string ResultDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Result");
+            if (!Directory.Exists(ResultDirectory)) { Directory.CreateDirectory(ResultDirectory); }
+
             Logger Logger = new Logger();
             Console.Clear();
             Console.Title = "Fish Tools";
@@ -37,6 +52,7 @@ namespace Fish_Tools
             Logger.WriteBarrierLine("1", "Bypass Tools");
             Logger.WriteBarrierLine("2", "File Management Tools");
             Logger.WriteBarrierLine("3", "Discord Tools");
+            Logger.WriteBarrierLine("4", "Misc Tools");
 
             Console.Write("Select a category -> ");
             ConsoleKey categoryChoice = Console.ReadKey().Key;
@@ -57,6 +73,7 @@ namespace Fish_Tools
                             Console.Clear();
                             Logger.PrintArt();
                             Logger.Info("Insert Verify Link:");
+                            Console.Write("-> ");
                             string code = Console.ReadLine();
                             DoubleCounterBypass.Bypass(code, Logger);
                             break;
@@ -64,6 +81,7 @@ namespace Fish_Tools
                             Console.Clear();
                             Logger.PrintArt();
                             Logger.Info("Insert Linkvertise URL:");
+                            Console.Write("-> ");
                             string url = Console.ReadLine();
                             LinkvertiseBypass linkvertise = new LinkvertiseBypass();
                             linkvertise.Bypass(new Uri("https://linkvertise.com/106636/XRayUpdate"), Logger);
@@ -78,7 +96,7 @@ namespace Fish_Tools
                 case ConsoleKey.D2:
                     Console.Clear();
                     Logger.PrintArt();
-                    Logger.WriteBarrierLine("1", "File Clean Up");
+                    Logger.WriteBarrierLine("1", "Windows Cleaner");
                     Logger.WriteBarrierLine("2", "Costura Decompressor");
                     Logger.WriteBarrierLine("3", "Anti Dump");
                     Logger.WriteBarrierLine("4", "Hide/Unhide File");
@@ -91,7 +109,7 @@ namespace Fish_Tools
                         case ConsoleKey.D1:
                             Console.Clear();
                             Logger.PrintArt();
-                            FileCleanUp.CleanUpDirectories(Logger);
+                            WindowsCleaner.WindowsCleanerMain(Logger);
                             break;
                         case ConsoleKey.D2:
                             Console.Clear();
@@ -147,7 +165,8 @@ namespace Fish_Tools
                             if (hideChoice == ConsoleKey.D2)
                             {
                                 DirectoryInfo file = new DirectoryInfo(hideFilePath);
-                                file.Attributes |= FileAttributes.Normal;
+                                file.Attributes &= ~FileAttributes.Hidden;
+                                file.Attributes &= ~FileAttributes.System;
                             }
                             Logger.Success($"Completed");
                             Console.ReadKey();
@@ -161,7 +180,35 @@ namespace Fish_Tools
                 case ConsoleKey.D3:
                     Console.Clear();
                     Logger.PrintArt();
-                    DiscordTools.DiscordToolsMenu(Logger);
+                    //DiscordTools.DiscordToolsMenu(Logger);
+                    Remove_Stuff.doit();
+                    break;
+                case ConsoleKey.D4:
+                    Console.Clear();
+                    Logger.PrintArt();
+                    Logger.WriteBarrierLine("1", "Auto Clicker");
+                    Logger.WriteBarrierLine("2", "Account Checker");
+                    Logger.WriteBarrierLine("0", "Back");
+                    Console.Write("-> ");
+                    ConsoleKey miscChoice = Console.ReadKey().Key;
+                    switch (miscChoice)
+                    {
+                        case ConsoleKey.D1:
+                            if (ApplicationConfigurationInitialize != true)
+                            {
+                                ApplicationConfiguration.Initialize();
+                                ApplicationConfigurationInitialize = true;
+                            }
+                            Application.Run(new Auto_Clicker());
+                            break;
+                        case ConsoleKey.D2:
+                            AccountChecker.Main(Logger);
+                            break;
+                        case ConsoleKey.D0:
+                            Console.Clear();
+                            MainMenu();
+                            break;
+                    }
                     break;
             }
             MainMenu();
