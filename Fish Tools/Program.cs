@@ -88,7 +88,7 @@ namespace Fish_Tools
                             Console.ReadKey();
                             break;
                         case ConsoleKey.D0:
-                            Console.Clear(); 
+                            Console.Clear();
                             MainMenu();
                             break;
                     }
@@ -180,8 +180,7 @@ namespace Fish_Tools
                 case ConsoleKey.D3:
                     Console.Clear();
                     Logger.PrintArt();
-                    //DiscordTools.DiscordToolsMenu(Logger);
-                    Remove_Stuff.doit();
+                    DiscordTools.DiscordToolsMenu(Logger);
                     break;
                 case ConsoleKey.D4:
                     Console.Clear();
