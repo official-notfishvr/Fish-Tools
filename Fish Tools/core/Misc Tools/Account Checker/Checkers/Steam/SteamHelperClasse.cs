@@ -5,6 +5,8 @@ github: https://github.com/official-notfishvr/Fish-Tools
 ------------------------------------------------------------
 */
 
+using System.Net.Http.Headers;
+
 namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers.Steam
 {
     class WindowsDialogsHelper
@@ -231,34 +233,30 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers.Steam
             SGPROTECTEDACCOUNTS
         }
 
-        public static void Export(WhatToExport whatToExport)
+        public async static Task Export(WhatToExport whatToExport)
         {
             try
             {
+                string filePath = string.Empty;
+
                 switch (whatToExport)
                 {
                     case WhatToExport.GOODACCOUNTS:
+                        filePath = $"{SteamAccountHelper.localToExport}\\Good Accounts.txt";
                         string goodAccounts = string.Join("", SteamAccountHelper.GoodAccountsList.ToArray());
-                        StreamWriter streamWriterGoodAccounts = new StreamWriter($"{SteamAccountHelper.localToExport}\\Good Accounts.txt");
-
-                        streamWriterGoodAccounts.WriteLine(goodAccounts);
-                        streamWriterGoodAccounts.Close();
+                        File.WriteAllText(filePath, goodAccounts);
                         break;
 
                     case WhatToExport.BADACCOUNTS:
+                        filePath = $"{SteamAccountHelper.localToExport}\\Bad Accounts.txt";
                         string badAccounts = string.Join("", SteamAccountHelper.badAccountsList.ToArray());
-                        StreamWriter streamWriterBadAccounts = new StreamWriter($"{SteamAccountHelper.localToExport}\\Bad Accounts.txt");
-
-                        streamWriterBadAccounts.WriteLine(badAccounts);
-                        streamWriterBadAccounts.Close();
+                        File.WriteAllText(filePath, badAccounts);
                         break;
 
                     case WhatToExport.SGPROTECTEDACCOUNTS:
+                        filePath = $"{SteamAccountHelper.localToExport}\\SteamGuard protected Accounts.txt";
                         string sGProtectedAccounts = string.Join("", SteamAccountHelper.sGProtectedAccountsList.ToArray());
-                        StreamWriter streamWriterSGAccounts = new StreamWriter($"{SteamAccountHelper.localToExport}\\SteamGuard protected Accounts.txt");
-
-                        streamWriterSGAccounts.WriteLine(sGProtectedAccounts);
-                        streamWriterSGAccounts.Close();
+                        File.WriteAllText(filePath, sGProtectedAccounts);
                         break;
                 }
                 MessageBox.Show("Done!", "SAS.exe", MessageBoxButtons.OK, MessageBoxIcon.Information);

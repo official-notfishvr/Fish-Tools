@@ -106,6 +106,8 @@ namespace Fish_Tools.core.Utils
                 }
             });
         }
+        public static void Wait(int miliseconds) { Task.Run(async () => await Task.Delay(miliseconds)).Wait(); }
+        public static void NewThread(Action action) { Task.Run(() => action.Invoke()); }
         public class Constants
         {
             //modifiers

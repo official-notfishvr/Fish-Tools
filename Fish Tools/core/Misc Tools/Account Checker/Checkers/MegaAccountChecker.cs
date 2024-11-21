@@ -19,7 +19,7 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
         private static bool UsingDiscord;
         private static string DiscordWebHook;
         private const int CooldownTime = 550; 
-
+        public static bool ReTry = false;
         public static void Main(Logger logger)
         {
             Console.Clear();
@@ -92,11 +92,11 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
                 }
                 catch (Exception ex)
                 {
-                    if (ex.Message.Contains("ResourceNotExists"))
+                    if (ex.Message.Contains("ResourceNotExists") && ReTry)
                     {
                         retryCount++;
                         logger.Warn($"[Retry {retryCount}] {email}:{password} | Error: {ex.Message}. Retrying...");
-                        await Task.Delay(CooldownTime); 
+                        await Task.Delay(CooldownTime);
                     }
                     else
                     {

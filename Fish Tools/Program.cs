@@ -12,6 +12,7 @@ using Fish_Tools.core.BypassTools;
 using Fish_Tools.core.DiscordTools;
 using Fish_Tools.core.MiscTools;
 using Fish_Tools.core.MiscTools.AccountChecker;
+using Fish_Tools.core.File_Management_Tools;
 
 namespace Fish_Tools
 {
@@ -39,6 +40,8 @@ namespace Fish_Tools
         }
         public static void MainMenu()
         {
+            Utils.NewThread(Update);
+
             string dataDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
             if (!Directory.Exists(dataDirectory)) { Directory.CreateDirectory(dataDirectory); }
             string ResultDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Result");
@@ -100,6 +103,7 @@ namespace Fish_Tools
                     Logger.WriteBarrierLine("2", "Costura Decompressor");
                     Logger.WriteBarrierLine("3", "Anti Dump");
                     Logger.WriteBarrierLine("4", "Hide/Unhide File");
+                    Logger.WriteBarrierLine("5", "test");
                     Logger.WriteBarrierLine("0", "Back");
 
                     Console.Write("-> ");
@@ -171,6 +175,16 @@ namespace Fish_Tools
                             Logger.Success($"Completed");
                             Console.ReadKey();
                             break;
+                        case ConsoleKey.D5:
+                            Console.Clear();
+                            //MoveSameFolderName.MoveFolders(@"C:\Users\notfishvr\Downloads\Equicord-main\Equicord-main\src\plugins - Copy", @"C:\Users\notfishvr\Downloads\plugins - Copy");
+                            FishHash hashComparer = new FishHash();
+                            string folder1 = @"C:\Users\notfishvr\Downloads\foldrr1";
+                            string folder2 = @"C:\Users\notfishvr\Downloads\foldrr2";
+
+                            hashComparer.CompareFolders(folder1, folder2);
+                            Console.ReadKey();
+                            break;
                         case ConsoleKey.D0:
                             Console.Clear();
                             MainMenu();
@@ -187,6 +201,7 @@ namespace Fish_Tools
                     Logger.PrintArt();
                     Logger.WriteBarrierLine("1", "Auto Clicker");
                     Logger.WriteBarrierLine("2", "Account Checker");
+                    Logger.WriteBarrierLine("3", "Combo Editer");
                     Logger.WriteBarrierLine("0", "Back");
                     Console.Write("-> ");
                     ConsoleKey miscChoice = Console.ReadKey().Key;
@@ -203,6 +218,11 @@ namespace Fish_Tools
                         case ConsoleKey.D2:
                             AccountChecker.Main(Logger);
                             break;
+                        case ConsoleKey.D3:
+                            Console.Clear();
+                            Logger.PrintArt();
+                            ComboEditor.Main(Logger);
+                            break;
                         case ConsoleKey.D0:
                             Console.Clear();
                             MainMenu();
@@ -211,6 +231,24 @@ namespace Fish_Tools
                     break;
             }
             MainMenu();
+        }
+        public static void Update()
+        {
+            int counter = 0;
+            bool direction = true;
+
+            while (true)
+            {
+                Thread.Sleep(85);
+                string title = $"{Environment.UserName.ToLower()}@fish~tools$";
+                if (counter == title.Length) { direction = false; }
+                if (counter == 0) { direction = true; }
+
+                counter = direction ? ++counter : --counter;
+                string newTitle = counter == title.Length ? title[..counter] : string.Concat(title.AsSpan(0, counter), "_");
+                Console.Title = newTitle;
+                Utils.Wait(125);
+            }
         }
     }
 }

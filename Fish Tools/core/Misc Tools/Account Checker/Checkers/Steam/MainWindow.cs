@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using System.Net.Http.Headers;
+using static SteamKit2.DepotManifest;
 
 namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers.Steam
 {
@@ -105,7 +107,7 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers.Steam
             }
         }
 
-        private void LoadFileContent(OpenFileDialog openFileDialog)
+        private async void LoadFileContent(OpenFileDialog openFileDialog)
         {
             try
             {
