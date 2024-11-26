@@ -12,8 +12,8 @@ Fish Tools has alot of tools you can use such as Anti Dump, Double Counter Bypas
 ### File Management Tools
 - **Windows Cleaner:** Clean up and optimize your Windows system.
 - **Costura Decompressor:** Decompress assemblies packed with Costura.
-- **Anti Dump:** Protect your code from unauthorized dumping.
-- **Hide File:** Securely conceal your files.
+- **Anti Dump:** Protect your code from being dumping.
+- **Hide/Unhide File:** Securely hide/unhide your files.
 
 ### Discord Tools
 - **Scrape Groups:** Display all the groups you're part of.
@@ -29,7 +29,11 @@ Fish Tools has alot of tools you can use such as Anti Dump, Double Counter Bypas
   - **mega.nz:** Checks mega.nz accounts.
   - **Discord:** Checks Discord accounts.
   - **Hulu:** Checks Hulu accounts.
-
+- **Combo Editer:**
+  - **Remove Spaces:** removes the spaces in the combo file.
+  - **Remove That Is Not email:pass:** removes everything that is not email and password.
+  - **Add ':' After email:** it adds : after the email.
+- **Extract Emails:** you extract emails form a file or folder.
 
 ## Requirements
 
