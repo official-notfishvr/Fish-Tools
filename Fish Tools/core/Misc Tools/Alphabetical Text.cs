@@ -1,9 +1,14 @@
-﻿/*
+﻿// not goaana add 
+// whos goaana use this
+// dont feel like to make 2
+
+/*
 ------------------------------------------------------------
 Made By notfishvr
 github: https://github.com/official-notfishvr/Fish-Tools
 ------------------------------------------------------------
 */
+/*
 namespace Fish_Tools.core.MiscTools
 {
     // not done
@@ -74,3 +79,4 @@ namespace Fish_Tools.core.MiscTools
         }
     }
 }
+*/
