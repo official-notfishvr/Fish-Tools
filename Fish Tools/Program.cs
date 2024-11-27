@@ -5,7 +5,6 @@ github: https://github.com/official-notfishvr/Fish-Tools
 ------------------------------------------------------------
 */
 using Fish_Tools.core.Utils;
-using AsmResolver.DotNet;
 using System.Runtime.InteropServices;
 using Fish_Tools.core.FileManagementTools;
 using Fish_Tools.core.BypassTools;
@@ -13,6 +12,10 @@ using Fish_Tools.core.DiscordTools;
 using Fish_Tools.core.MiscTools;
 using Fish_Tools.core.MiscTools.AccountChecker;
 using Fish_Tools.core.Misc_Tools;
+using System.Net;
+using System.IO.Compression;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace Fish_Tools
 {
@@ -24,6 +27,8 @@ namespace Fish_Tools
 
         public static bool ApplicationConfigurationInitialize = false;
         public static bool IsTitleUpdated = false;
+        private static string CurrentVersion = "2.3";
+        private static readonly string VersionUrl = "https://raw.githubusercontent.com/official-notfishvr/Fish-Tools/refs/heads/main/version";
 
         /// <summary>
         ///  The main entry point for the application.
@@ -32,6 +37,7 @@ namespace Fish_Tools
         static void Main()
         {
             AllocConsole();
+            CheckForUpdates();
             MainMenu();
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
@@ -128,13 +134,19 @@ namespace Fish_Tools
                                 Logger.Info($"Processing executable: {Path.GetFileName(path)}");
                                 try
                                 {
-                                    var module = ModuleDefinition.FromFile(path);
-                                    var extractor = new CosturaDecompressor(module);
+                                    var assembly = Assembly.LoadFrom(path);
+                                    var extractor = new CosturaDecompressor(assembly);
                                     extractor.Run(Logger);
                                 }
-                                catch (Exception e) { Logger.Error(e.Message); }
+                                catch (Exception e)
+                                {
+                                    Logger.Error(e.Message);
+                                }
                             }
-                            if (path.EndsWith(".compressed")) { path.ProcessCompressedFile(Logger); }
+                            if (path.EndsWith(".compressed"))
+                            {
+                                path.ProcessCompressedFile(Logger);
+                            }
                             break;
                         case ConsoleKey.D3:
                             Console.Clear();
@@ -248,6 +260,66 @@ namespace Fish_Tools
                 string newTitle = counter == title.Length ? title[..counter] : string.Concat(title.AsSpan(0, counter), "_");
                 Console.Title = newTitle;
                 Utils.Wait(135);
+            }
+        }
+        public static void CheckForUpdates() // not using Logger bc it gets made in MainMenu and i dont feel like moving stuff
+        {
+            try
+            {
+                string exePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fish Tools.exe");
+                string dllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fish Tools.dll");
+                string winRtDllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "WinRT.Runtime.dll");
+
+                string renamedExePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fish Tools.old.exe");
+                string renamedDllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fish Tools.old.dll");
+                string renamedWinRtDllPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "WinRT.Runtime.old.dll");
+                string newFileZipName = "Fish-Tools-Update.zip";
+
+                using (WebClient client = new WebClient())
+                {
+                    string remoteVersion = client.DownloadString(VersionUrl).Trim();
+
+                    if (!remoteVersion.Contains(CurrentVersion))
+                    {
+                        if (File.Exists(exePath)) { File.Move(exePath, renamedExePath); }
+                        if (File.Exists(dllPath)) { File.Move(dllPath, renamedDllPath); }
+                        if (File.Exists(winRtDllPath)) { File.Move(winRtDllPath, renamedWinRtDllPath); }
+
+                        Console.Clear();
+                        Console.WriteLine($"A new version is available: {remoteVersion} (Current: {CurrentVersion})");
+                        Console.WriteLine("Downloading the latest version...");
+                        string latestDownloadUrl = $"https://github.com/official-notfishvr/Fish-Tools/releases/latest/download/Fish-Tools-V{remoteVersion}.zip";
+                        string tempZipPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, newFileZipName);
+                        client.DownloadFile(latestDownloadUrl, tempZipPath);
+
+                        Console.WriteLine("Download complete! Extracting files...");
+                        System.IO.Compression.ZipFile.ExtractToDirectory(tempZipPath, AppDomain.CurrentDomain.BaseDirectory, true);
+                        File.Delete(tempZipPath);
+                        string batFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "updateAndRestart.bat");
+                        string batContent = @$"
+                @echo off
+                timeout /t 2 /nobreak
+                del ""{renamedExePath}""
+                del ""{renamedDllPath}""
+                del ""{renamedWinRtDllPath}""
+                del ""{newFileZipName}""
+                start ""Fish Tools.exe""
+                exit
+                ";
+                        File.WriteAllText(batFilePath, batContent);
+                        System.Diagnostics.Process.Start(batFilePath);
+                        Environment.Exit(0);
+                    }
+                    else
+                    {
+                        Console.Clear();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error checking for updates: {ex.Message}");
+                Console.ReadKey();
             }
         }
     }

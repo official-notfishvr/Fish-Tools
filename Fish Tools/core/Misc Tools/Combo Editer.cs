@@ -50,7 +50,8 @@ namespace Fish_Tools.core.MiscTools
                 logger.WriteBarrierLine("1", "Remove Spaces");
                 logger.WriteBarrierLine("2", "Remove That Is Not email:pass");
                 logger.WriteBarrierLine("3", "Add ':' After email");
-                logger.WriteBarrierLine("0", "Save Combos");
+                logger.WriteBarrierLine("9", "Save Combos");
+                logger.WriteBarrierLine("0", "Back");
                 Console.Write("-> ");
 
                 ConsoleKey Choice = Console.ReadKey().Key;
@@ -82,7 +83,7 @@ namespace Fish_Tools.core.MiscTools
                         Console.ReadKey();
                         Main(logger);
                         break;
-                    case ConsoleKey.D0:
+                    case ConsoleKey.D9:
                         if (!string.IsNullOrEmpty(_combosPath) && _combos != null)
                         {
                             string directory = Path.GetDirectoryName(_combosPath);
@@ -101,6 +102,10 @@ namespace Fish_Tools.core.MiscTools
                             logger.Error("No combos loaded or invalid path.");
                             Console.ReadKey();
                         }
+                        break;
+                    case ConsoleKey.D0:
+                        Console.Clear();
+                        Program.MainMenu();
                         break;
                     default:
                         logger.Warn("Invalid option selected.");

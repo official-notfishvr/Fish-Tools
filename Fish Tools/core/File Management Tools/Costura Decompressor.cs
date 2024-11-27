@@ -4,62 +4,66 @@ Made By notfishvr
 github: https://github.com/official-notfishvr/Fish-Tools
 ------------------------------------------------------------
 */
-using AsmResolver.DotNet;
+using System.Reflection;
 using Fish_Tools.core.Utils;
 
 namespace Fish_Tools.core.FileManagementTools
 {
     internal class CosturaDecompressor
     {
-        private readonly ModuleDefinition _module;
+        private readonly Assembly _assembly;
 
         private readonly string _outputPath;
 
-        public CosturaDecompressor(ModuleDefinition module)
+        public CosturaDecompressor(Assembly assembly)
         {
-            _module = module;
-            _outputPath = module.GetOutputPath();
+            _assembly = assembly;
+            _outputPath = assembly.GetOutputPath();
         }
 
-        public void Run(Logger Logger)
+        public void Run(Logger logger)
         {
-            if (ExtractResources(out var resources, Logger))
+            if (ExtractResources(out var resources, logger))
             {
-                SaveResources(resources, Logger);
+                SaveResources(resources, logger);
                 return;
             }
 
-            Logger.Error("Could not find or extract costura embedded resources");
+            logger.Error("Could not find or extract costura embedded resources");
         }
 
-        private bool ExtractResources(out Dictionary<byte[], string> resources, Logger Logger)
+        private bool ExtractResources(out Dictionary<byte[], string> resources, Logger logger)
         {
             resources = new Dictionary<byte[], string>();
 
-            if (_module.Resources.Count == 0) return false;
+            var manifestResourceNames = _assembly.GetManifestResourceNames();
+            if (manifestResourceNames.Length == 0) return false;
 
-            foreach (var resource in _module.Resources)
+            foreach (var resourceName in manifestResourceNames)
             {
-                if (!resource.IsEmbedded) continue;
+                if (!resourceName.StartsWith("costura.") || !resourceName.EndsWith(".compressed")) continue;
 
-                string name = resource.Name;
+                string name = resourceName.Substring(8, resourceName.LastIndexOf(".compressed") - 8);
 
-                if (name.Length < 19) continue;
+                using (var stream = _assembly.GetManifestResourceStream(resourceName))
+                {
+                    if (stream == null) continue;
+                    byte[] data;
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        stream.CopyTo(memoryStream);
+                        data = memoryStream.ToArray();
+                    }
 
-                if (!name.StartsWith("costura.") || !name.EndsWith(".compressed")) continue;
-                name = name.Substring(8, name.LastIndexOf(".compressed") - 8);
-
-                byte[] data = resource.GetData();
-
-                if (data != null) resources.Add(data.Decompress(Logger), name);
-
-                Logger.Success($"Extracted costura resource {name}");
+                    resources.Add(data.Decompress(logger), name);
+                    logger.Success($"Extracted costura resource {name}");
+                }
             }
 
             return resources.Count != 0;
         }
 
-        private void SaveResources(Dictionary<byte[], string> extractedResources, Logger Logger)
+        private void SaveResources(Dictionary<byte[], string> extractedResources, Logger logger)
         {
             if (!Directory.Exists(_outputPath)) Directory.CreateDirectory(_outputPath);
 
@@ -69,7 +73,7 @@ namespace Fish_Tools.core.FileManagementTools
                 File.WriteAllBytes(fullPath, entry.Key);
             }
 
-            Logger.Info($"Saved {extractedResources.Count} extracted Resources to {_outputPath}");
+            logger.Info($"Saved {extractedResources.Count} extracted resources to {_outputPath}");
         }
     }
 }

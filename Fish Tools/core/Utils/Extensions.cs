@@ -5,6 +5,7 @@ github: https://github.com/official-notfishvr/Fish-Tools
 ------------------------------------------------------------
 */
 using System.IO.Compression;
+using System.Reflection;
 
 namespace Fish_Tools.core.Utils
 {
@@ -22,15 +23,14 @@ namespace Fish_Tools.core.Utils
             }
         }
 
-        public static string GetOutputPath(this AsmResolver.DotNet.ModuleDefinition module)
+        public static string GetOutputPath(this Assembly assembly)
         {
-            if (module.FilePath == null) return null;
-            if (module.Assembly == null) return null;
-            string name = Path.GetFileName(module.FilePath);
-            return Path.Combine(module.FilePath.Remove(module.FilePath.Length - name.Length), $@"{module.Assembly.Name}-decompressed-resources\");
+            if (assembly.Location == null) return null;
+            string name = Path.GetFileName(assembly.Location);
+            return Path.Combine(assembly.Location.Remove(assembly.Location.Length - name.Length), $"{assembly.GetName().Name}-decompressed-resources\\");
         }
 
-        public static byte[] Decompress(this byte[] data, Logger Logger)
+        public static byte[] Decompress(this byte[] data, Logger logger)
         {
             using (var input = new MemoryStream(data))
             {
@@ -45,12 +45,15 @@ namespace Fish_Tools.core.Utils
             }
         }
 
-        public static void ProcessCompressedFile(this string inputFile, Logger Logger)
+        public static void ProcessCompressedFile(this string inputFile, Logger logger)
         {
-            string outputFileName = inputFile.Replace("costura.", null);
-            outputFileName = outputFileName.Replace(".compressed", null);
-            using (var bufferStream = File.OpenRead(inputFile)) File.WriteAllBytes(outputFileName, bufferStream.DecompressResource());
-            Logger.Success($"Decompressed costura file: {inputFile}");
+            string outputFileName = inputFile.Replace("costura.", string.Empty);
+            outputFileName = outputFileName.Replace(".compressed", string.Empty);
+            using (var bufferStream = File.OpenRead(inputFile))
+            {
+                File.WriteAllBytes(outputFileName, bufferStream.DecompressResource());
+            }
+            logger.Success($"Decompressed costura file: {inputFile}");
         }
     }
 }

@@ -41,18 +41,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AsmResolver" Version="5.5.1" />
-    <PackageReference Include="AsmResolver.DotNet" Version="5.5.1" />
     <PackageReference Include="Discord.Anarchy" Version="0.8.3.2" />
-    <PackageReference Include="Leaf.xNet" Version="5.2.10" />
     <PackageReference Include="MegaApiClient" Version="1.10.4" />
     <PackageReference Include="SteamKit2" Version="2.5.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Extreme.Net">
-      <HintPath>..\Dependencies\Extreme.Net.dll</HintPath>
-    </Reference>
     <Reference Include="Fish Console Lib">
       <HintPath>..\Dependencies\Fish Console Lib.dll</HintPath>
     </Reference>
