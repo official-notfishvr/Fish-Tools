@@ -10,7 +10,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using static Fish_Tools.core.Utils.Utils;
+using static Fish_Tools.core.Utils.Settings;
 
 namespace Fish_Tools.core.FileManagementTools
 {
@@ -434,8 +434,8 @@ namespace Fish_Tools.core.FileManagementTools
 
             try
             {
-                RunCommand("SCHTASKS /Delete /TN \"OneDrive Standalone Update Task\" /F");
-                RunCommand("SCHTASKS /Delete /TN \"OneDrive Standalone Update Task v2\" /F");
+                Utils.Utils.RunCommand("SCHTASKS /Delete /TN \"OneDrive Standalone Update Task\" /F");
+                Utils.Utils.RunCommand("SCHTASKS /Delete /TN \"OneDrive Standalone Update Task v2\" /F");
             }
             catch (Exception ex)
             {

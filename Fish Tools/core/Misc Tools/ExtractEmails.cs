@@ -14,7 +14,7 @@ using Fish_Tools.core.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Fish_Tools.core.Misc_Tools
+namespace Fish_Tools.core.MiscTools
 {
     internal class ExtractEmails
     {

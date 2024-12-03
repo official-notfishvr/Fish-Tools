@@ -9,10 +9,14 @@ using Discord.Gateway;
 using Discord;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
-using static Fish_Tools.core.Utils.Utils.Config;
+using static Fish_Tools.core.Utils.Settings.Config;
 using System.Text;
 using System.Net;
 using static Fish_Tools.core.Utils.Utils;
+using static Fish_Tools.core.Utils.Settings;
+using System.Windows.Forms;
+using System.Reflection.Emit;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Fish_Tools.core.DiscordTools
 {
@@ -22,6 +26,7 @@ namespace Fish_Tools.core.DiscordTools
         public static string token;
         public static string username;
         public static List<BotGuild> BotGuilds = new List<BotGuild>();
+        public static DiscordUser usr = new DiscordUser();
         public struct BotGuild
         {
             public DiscordGuild Guild { get; }
@@ -81,7 +86,13 @@ namespace Fish_Tools.core.DiscordTools
         public static async Task DiscordToolsMenu(Logger Logger)
         {
             LoadConfig();
-            if (string.IsNullOrEmpty(token))
+
+            if (!string.IsNullOrEmpty(Config.Data?.Discord?.Token))
+            {
+                token = Config.Data.Discord.Token;
+                Login(token, Logger);
+            }
+            else
             {
                 Console.Clear();
                 Console.Title = "Fish Tools";
@@ -90,7 +101,6 @@ namespace Fish_Tools.core.DiscordTools
                 Console.Write("-> ");
                 token = Console.ReadLine();
                 Login(token, Logger);
-                Console.ReadKey();
             }
 
             Console.Clear();
@@ -98,6 +108,7 @@ namespace Fish_Tools.core.DiscordTools
             Logger.PrintArt();
             Logger.WriteBarrierLine("1", "Scrape Groups");
             Logger.WriteBarrierLine("2", "Messages");
+            Logger.WriteBarrierLine("3", "Discord UserLookUp");
             Console.Write("-> ");
             ConsoleKey choice = Console.ReadKey().Key;
             switch (choice)
@@ -111,6 +122,33 @@ namespace Fish_Tools.core.DiscordTools
                     Console.Clear();
                     Console.WriteLine();
                     await SendMessage(Logger);
+                    break;
+                case ConsoleKey.D3:
+                    Console.Clear();
+                    Logger.PrintArt();
+                    Logger.Info("User Id? to look up");
+                    Console.Write("-> ");
+                    string UserID = Console.ReadLine();
+                    if (ulong.TryParse(UserID, out _))
+                    {
+                        using (WebClient web = new WebClient())
+                        {
+                            web.Headers.Add(HttpRequestHeader.Authorization, "Bot " + GetToken());
+                            string data = web.DownloadString($"https://discord.com/api/v8/users/{UserID}");
+
+                            DiscordUser usr = System.Text.Json.JsonSerializer.Deserialize<DiscordUser>(data);
+                            usr.avatar = $"https://cdn.discordapp.com/avatars/{usr.id}/{usr.avatar}";
+                            usr.ConvertedFlags = CalculateUserFlags(usr.public_flags);
+                            Logger.Success($"ID: {usr.id}");
+                            Logger.Success($"Username: {usr.username}#{usr.discriminator}");
+                            Logger.Success($"User Flags: {usr.ConvertedFlags}");
+                            Console.ReadKey();
+                        }
+                    }
+                    else
+                    {
+                        Logger.Error("That isn't a valid Discord User ID!");
+                    }
                     break;
             }
             Console.WriteLine();
@@ -262,5 +300,53 @@ namespace Fish_Tools.core.DiscordTools
             Console.ReadKey();
             await DiscordToolsMenu(logger);
         }
+        #region Userid Look up
+        public static string GetToken()
+        {
+            string tkns = "eyJ0b2tlbnMiOlsiT0RVeE1ETTNOVFk1TkRRNE9EQTBNelV5LllMeWNnQS5XdU1xaUR6d1lBZnBQMm9tVmM1aEZEcV9PbDQiLCJPRFV4TURRMU56a3hOREF4TVRFMU5qVTQuWUx5a0tBLmxyOEIxaXJncW15dWwyQ0t3LWNtVkhKbjdlbyIsIk9EVXhNRFExT1RFNU5qazNNREV3TmpnNC5ZTHlrUmcuZ0IwWlBhaDhtdGl2ZnBjaVRRbUdQbWdjVTBNIl19";
+            string[] tokens = System.Text.Json.JsonSerializer.Deserialize<Token>(Base64Decode(tkns)).tokens;
+
+            return tokens[new Random().Next(0, tokens.Length)];
+        }
+        public static string Base64Decode(string base64EncodedData)
+        {
+            var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
+            return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+        }
+        public class Token
+        {
+            public string[] tokens { get; set; }
+        }
+        public class DiscordUser
+        {
+            public string id { get; set; }
+            public string username { get; set; }
+            public string avatar { get; set; }
+            public string discriminator { get; set; }
+            public int public_flags { get; set; }
+            public string ConvertedFlags { get; set; }
+        }
+        private static string CalculateUserFlags(int number)
+        {
+            // https://discord.com/developers/docs/resources/user#user-object-user-flags
+            switch (number)
+            {
+                case 1 << 0: return "Discord Employee";
+                case 1 << 1: return "Partnered Server Owner";
+                case 1 << 2: return "HypeSquad Events";
+                case 1 << 3: return "Bug Hunter Level 1";
+                case 1 << 6: return "House Bravery";
+                case 1 << 7: return "House Brilliance";
+                case 1 << 8: return "House Balance";
+                case 1 << 9: return "Early Supporter";
+                case 1 << 10: return "Team User";
+                case 1 << 14: return "Bug Hunter Level 2";
+                case 1 << 16: return "Verified Bot";
+                case 1 << 17: return "Early Verified Bot Developer";
+                case 1 << 18: return "Discord Certified Moderator";
+                default: return "None";
+            }
+        }
+        #endregion
     }
 }

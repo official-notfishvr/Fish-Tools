@@ -7,7 +7,7 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
 {
     internal class DiscordAccountChecker
     {
-        private static readonly string CombosFile = "Combos.txt";
+        private static string CombosFile;
         private static readonly string HitsFile = "Result/DiscordHits.txt";
         public static int valid;
         public static int unverified;
@@ -23,11 +23,19 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
             logger.PrintArt();
 
             File.WriteAllText(HitsFile, string.Empty);
-            //File.WriteAllText(CombosFile, string.Empty);
-            logger.Info($"Place your combo inside \"{CombosFile}\" in format TOKEN and press enter.");
-            Console.ReadKey();
 
-            logger.Info($"If you want hits to be sent to your Discord, insert webhook and press enter. Otherwise, leave blank:");
+            logger.Info("Enter the full path to your combos file and press enter:");
+            Console.Write("-> ");
+            CombosFile = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(CombosFile) || !File.Exists(CombosFile))
+            {
+                logger.Error("Invalid file path or file does not exist. Please restart and provide a valid file path.");
+                return;
+            }
+
+            logger.Info("If you want hits to be sent to your Discord, insert webhook and press enter. Otherwise, leave blank:");
+            Console.Write("-> ");
             string discord = Console.ReadLine();
             UsingDiscord = !string.IsNullOrWhiteSpace(discord);
             DiscordWebHook = discord;
@@ -49,18 +57,11 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
         }
         private static async Task TestCombos(Logger logger)
         {
-            if (!File.Exists(CombosFile))
-            {
-                logger.Error($"No combos detected. Please upload them to \"{CombosFile}\".");
-                File.Create(CombosFile).Close();
-                return;
-            }
-
             string[] combos = File.ReadAllLines(CombosFile);
 
             if (combos.Length == 0)
             {
-                logger.Error("No combos detected. Please upload them to \"Combos.txt\".");
+                logger.Error("No combos detected in the provided file.");
                 return;
             }
 

@@ -52,7 +52,7 @@ namespace Fish_Tools.core.BypassTools
         public T CreateRequestData<T>(string userId, string url, string? accessToken = null, string? adCompletedToken = null) where T : BaseRequest
         {
             T request = Activator.CreateInstance<T>();
-            request.root = new BaseRequest.RootMain
+            request.Root = new BaseRequest.RootMain
             {
                 OperationName = BaseRequest.GetOperation<T>(),
                 Query = BaseRequest.GetMutationQuery<T>(),
@@ -64,8 +64,8 @@ namespace Fish_Tools.core.BypassTools
                 }
             };
 
-            if (typeof(T) == typeof(AdCompletedToken)) { request.root.Variables.CompleteDetailPageContent = new AdCompletedToken.CompleteDetailPageContent { access_token = accessToken }; }
-            else if (typeof(T) == typeof(FinalResponse)) { request.root.Variables.Token = adCompletedToken; }
+            if (typeof(T) == typeof(AdCompletedToken)) { request.Root.Variables.CompleteDetailPageContent = new AdCompletedToken.CompleteDetailPageContent { access_token = accessToken }; }
+            else if (typeof(T) == typeof(FinalResponse)) { request.Root.Variables.Token = adCompletedToken; }
             return request;
         }
         public async Task Bypass(Uri uri, Logger Logger)
@@ -172,7 +172,7 @@ namespace Fish_Tools.core.BypassTools
         // BaseRequest
         public class BaseRequest
         {
-            public RootMain root { get; set; }
+            public RootMain? Root { get; set; }
 
             public class LinkIdentification
             {

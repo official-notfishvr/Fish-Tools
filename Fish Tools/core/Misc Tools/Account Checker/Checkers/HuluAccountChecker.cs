@@ -11,7 +11,6 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
 {
     internal class HuluAccountChecker
     {
-        private static readonly string CombosFile = "Combos.txt";
         private const int CooldownTime = 350;
         public static List<string> Proxys = new List<string>();
         public static Random Rand = new Random();
@@ -26,35 +25,38 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
             logger.PrintArt();
 
             File.WriteAllText(HitsFile, string.Empty);
-            logger.Info($"Place your combo inside \"{CombosFile}\" in format EMAIL:PASSWORD and press enter.");
-            Console.ReadKey();
 
-            logger.Info($"If you want hits to be sent to your Discord, insert webhook and press enter. Otherwise, leave blank:");
+            logger.Info("Enter the path to your combos file:");
+            Console.Write("-> ");
+            string combosPath = Console.ReadLine();
+
+            if (!File.Exists(combosPath))
+            {
+                logger.Error($"No combos detected at the specified path: {combosPath}.");
+                return;
+            }
+
+            logger.Info("If you want hits to be sent to your Discord, insert webhook and press enter. Otherwise, leave blank:");
+            Console.Write("-> ");
             string discord = Console.ReadLine();
             UsingDiscord = !string.IsNullOrWhiteSpace(discord);
             DiscordWebHook = discord;
 
-            logger.Info("Proxys Path");
+            logger.Info("Proxys Path:");
+            Console.Write("-> ");
             string proxys = Console.ReadLine();
             Proxys.AddRange(File.ReadAllLines(proxys));
 
-            TestCombos(logger).GetAwaiter().GetResult();
+            TestCombos(logger, combosPath).GetAwaiter().GetResult();
         }
         public static string getProxy() { return Proxys[Rand.Next(0, Proxys.Count)]; }
-        private static async Task TestCombos(Logger logger)
+        private static async Task TestCombos(Logger logger, string combosPath)
         {
-            if (!File.Exists(CombosFile))
-            {
-                logger.Error($"No combos detected. Please upload them to \"{CombosFile}\".");
-                File.Create(CombosFile).Close();
-                return;
-            }
-
-            string[] combos = File.ReadAllLines(CombosFile);
+            string[] combos = File.ReadAllLines(combosPath);
 
             if (combos.Length == 0)
             {
-                logger.Error("No combos detected. Please upload them to \"Combos.txt\".");
+                logger.Error("No combos detected in the specified file.");
                 return;
             }
 

