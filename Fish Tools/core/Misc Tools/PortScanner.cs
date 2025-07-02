@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Fish_Tools.core.Utils;
+using System.Linq;
 
 namespace Fish_Tools.core.MiscTools
 {
@@ -32,10 +33,18 @@ namespace Fish_Tools.core.MiscTools
             Logger.Info($"Automatically detected local IP: {target}");
             int startPort = 1;
             int endPort = 1024;
-            int timeout = 1000;
+            int timeout = 60;
             Logger.Info($"Starting port scan on {target} from port {startPort} to {endPort}...");
             Logger.Info("This may take a while depending on the range...");
-            ScanPorts(target, startPort, endPort, timeout, Logger).GetAwaiter().GetResult();
+            try
+            {
+                ScanPorts(target, startPort, endPort, timeout, Logger).GetAwaiter().GetResult();
+                Logger.Debug("ScanPorts completed and returned to Main.");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Exception during scan: {ex.Message}");
+            }
             Logger.Info("Press any key to return to menu...");
             Console.ReadKey();
         }
@@ -67,38 +76,46 @@ namespace Fish_Tools.core.MiscTools
         private async Task ScanPorts(string target, int startPort, int endPort, int timeout, Logger Logger)
         {
             var openPorts = new List<int>();
+            var closedPorts = new List<int>();
+            var portResults = new List<(int port, string result)>();
             var tasks = new List<Task>();
-            
+            int totalPorts = endPort - startPort + 1;
+            int scannedCount = 0;
+            object progressLock = new object();
             for (int port = startPort; port <= endPort; port++)
             {
                 int currentPort = port;
                 tasks.Add(Task.Run(async () =>
                 {
-                    if (await IsPortOpen(target, currentPort, timeout))
+                    bool isOpen = await IsPortOpen(target, currentPort, timeout);
+                    string service = GetServiceName(currentPort);
+                    lock (progressLock)
                     {
-                        lock (openPorts)
+                        if (isOpen)
                         {
                             openPorts.Add(currentPort);
+                            portResults.Add((currentPort, $"Port {currentPort} ({service}) - OPEN"));
+                            Logger.Write($"Port {currentPort} ({service}) - OPEN");
                         }
+                        else
+                        {
+                            closedPorts.Add(currentPort);
+                            portResults.Add((currentPort, $"Port {currentPort} ({service}) - CLOSED"));
+                            Logger.Write($"Port {currentPort} ({service}) - CLOSED");
+                        }
+                        scannedCount++;
                     }
                 }));
             }
-            
             await Task.WhenAll(tasks);
-            
-            Logger.Success($"Scan completed! Found {openPorts.Count} open ports:");
-            
-            if (openPorts.Count > 0)
+            Logger.Debug("All port scan tasks completed.");
+            Logger.Write("");
+            foreach (var result in portResults.OrderBy(r => r.port))
             {
-                openPorts.Sort();
-                foreach (int port in openPorts)
-                {
-                    string service = GetServiceName(port);
-                    Logger.Write($"Port {port} ({service}) - OPEN");
-                    Console.WriteLine();
-                }
+                Logger.Write(result.result);
             }
-            else
+            Logger.Success($"Scan completed! Found {openPorts.Count} open ports, {closedPorts.Count} closed ports.");
+            if (openPorts.Count == 0)
             {
                 Logger.Warn("No open ports found in the specified range.");
             }
