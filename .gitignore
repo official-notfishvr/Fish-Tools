@@ -1,0 +1,66 @@
+# Ignore Visual Studio temporary files, build results, and user-specific files
+.vs/
+*.user
+*.suo
+
+# Build results
+bin/
+obj/
+out/
+
+# NuGet packages
+*.nupkg
+packages/
+# Uncomment if you have project.lock.json
+# project.lock.json
+# Uncomment if you have project.fragment.lock.json
+# project.fragment.lock.json
+
+# Rider
+.idea/
+
+# DotCover
+*.dotCover
+
+# Backup & log files
+*.log
+*.bak
+
+# User-specific files
+*.vspscc
+*.vssscc
+
+# Other cache or temp folders
+TestResults/
+*.cache
+*.pdb
+*.mdb
+
+# Publish Web output
+*.publishsettings
+*.azurePubxml
+*.azurePubxml.user
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Local history for JetBrains IDEs
+.idea/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# File-based database
+*.mdf
+*.ldf
+
+# SQL Server files
+*.ndf
+
+# Entity Framework
+*.sqlite
+
+# Others
+*.dbmdl
