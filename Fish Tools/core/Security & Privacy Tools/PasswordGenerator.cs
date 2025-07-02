@@ -1,3 +1,9 @@
+/*
+------------------------------------------------------------
+Made By notfishvr
+github: https://github.com/official-notfishvr/Fish-Tools
+------------------------------------------------------------
+*/
 using System;
 using System.Linq;
 using Fish_Tools.core.Utils;
@@ -7,7 +13,7 @@ namespace Fish_Tools.core.MiscTools
     internal class PasswordGenerator : ITool
     {
         public string Name => "Password Generator";
-        public string Category => "Misc Tools";
+        public string Category => "Security & Privacy Tools";
         public bool IsEnabled { get; set; } = true;
         public string Description => "Generate secure passwords with various options";
 

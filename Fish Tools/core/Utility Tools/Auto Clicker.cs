@@ -9,7 +9,7 @@ namespace Fish_Tools.core.MiscTools
     public partial class Auto_Clicker : Form, ITool
     {
         public string Name => "Auto Clicker";
-        public string Category => "Misc Tools";
+        public string Category => "Utility Tools";
         public bool IsEnabled { get; set; } = true;
         public string Description => "Automated clicking and key pressing tool";
 

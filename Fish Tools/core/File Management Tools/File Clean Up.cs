@@ -1,4 +1,10 @@
 ﻿// for me
+/*
+------------------------------------------------------------
+Made By notfishvr
+github: https://github.com/official-notfishvr/Fish-Tools
+------------------------------------------------------------
+*/
 using Fish_Tools.core.Utils;
 using System;
 using System.IO;

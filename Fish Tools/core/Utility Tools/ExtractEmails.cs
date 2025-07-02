@@ -19,7 +19,7 @@ namespace Fish_Tools.core.MiscTools
     internal class ExtractEmails : ITool
     {
         public string Name => "Extract Emails";
-        public string Category => "Misc Tools";
+        public string Category => "Utility Tools";
         public bool IsEnabled { get; set; } = true;
         public string Description => "Extract email addresses from text and JSON files";
 

@@ -13,7 +13,7 @@ namespace Fish_Tools.core.Misc_Tools
     internal class Spoofer : ITool
     {
         public string Name => "Spoofer";
-        public string Category => "Misc Tools";
+        public string Category => "Security & Privacy Tools";
         public bool IsEnabled { get; set; } = true;
         public string Description => "Network and hardware ID spoofing tools";
 

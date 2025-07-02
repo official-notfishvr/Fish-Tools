@@ -1,3 +1,9 @@
+/*
+------------------------------------------------------------
+Made By notfishvr
+github: https://github.com/official-notfishvr/Fish-Tools
+------------------------------------------------------------
+*/
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -10,7 +16,7 @@ namespace Fish_Tools.core.MiscTools
     internal class PortScanner : ITool
     {
         public string Name => "Port Scanner";
-        public string Category => "Misc Tools";
+        public string Category => "Network & System Tools";
         public bool IsEnabled { get; set; } = true;
         public string Description => "Scan for open ports on a target host";
 

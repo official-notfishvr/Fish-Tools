@@ -1,3 +1,9 @@
+/*
+------------------------------------------------------------
+Made By notfishvr
+github: https://github.com/official-notfishvr/Fish-Tools
+------------------------------------------------------------
+*/
 using System;
 using System.IO;
 using System.Security.Cryptography;
@@ -9,7 +15,7 @@ namespace Fish_Tools.core.FileManagementTools
     internal class FileEncryptor : ITool
     {
         public string Name => "File Encryptor";
-        public string Category => "File Management Tools";
+        public string Category => "Security & Privacy Tools";
         public bool IsEnabled { get; set; } = true;
         public string Description => "Encrypt and decrypt files using AES encryption with password protection";
 

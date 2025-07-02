@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+------------------------------------------------------------
+Made By notfishvr
+github: https://github.com/official-notfishvr/Fish-Tools
+------------------------------------------------------------
+*/
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

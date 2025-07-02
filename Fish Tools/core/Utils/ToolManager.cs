@@ -74,6 +74,42 @@ namespace Fish_Tools.core.Utils
         }
         
 
+        public static List<string> GetCategoriesOrdered()
+        {
+            var categories = GetCategories();
+            var categoryOrder = new List<string>
+            {
+                "File Management Tools",
+                "Security & Privacy Tools", 
+                "Network & System Tools",
+                "Account Management Tools",
+                "Discord Tools",
+                "Utility Tools",
+                "Bypass Tools",
+                "Misc Tools"
+            };
+            
+            return categoryOrder.Where(cat => categories.Contains(cat)).ToList();
+        }
+        
+
+        public static string GetCategoryDisplayName(string category)
+        {
+            return category switch
+            {
+                "File Management Tools" => "File Management Tools",
+                "Security & Privacy Tools" => "Security & Privacy Tools",
+                "Network & System Tools" => "Network & System Tools", 
+                "Account Management Tools" => "Account Management Tools",
+                "Discord Tools" => "Discord Tools",
+                "Utility Tools" => "Utility Tools",
+                "Bypass Tools" => "Bypass Tools",
+                "Misc Tools" => "Misc Tools",
+                _ => category
+            };
+        }
+        
+
         public static List<ITool> GetToolsByCategory(string category)
         {
             return _toolsByCategory.ContainsKey(category) ? _toolsByCategory[category] : new List<ITool>();

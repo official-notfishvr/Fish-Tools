@@ -23,7 +23,7 @@ namespace Fish_Tools.core.DiscordTools
     internal class DiscordTools : ITool
     {
         public string Name => "Discord Tools";
-        public string Category => "Discord Tools";
+        public string Category => "Misc Tools";
         public bool IsEnabled { get; set; } = true;
         public string Description => "Discord automation and management tools";
 

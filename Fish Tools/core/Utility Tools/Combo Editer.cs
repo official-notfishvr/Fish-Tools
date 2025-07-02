@@ -15,7 +15,7 @@ namespace Fish_Tools.core.MiscTools
     internal class ComboEditor : ITool
     {
         public string Name => "Combo Editor";
-        public string Category => "Misc Tools";
+        public string Category => "Utility Tools";
         public bool IsEnabled { get; set; } = true;
         public string Description => "Edit and format combo lists (email:password)";
 

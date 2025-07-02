@@ -67,11 +67,12 @@ namespace Fish_Tools
                 Console.Title = "Fish Tools";
                 Logger.PrintArt();
 
-                var categories = ToolManager.GetCategories();
+                var categories = ToolManager.GetCategoriesOrdered();
 
                 for (int i = 0; i < categories.Count; i++)
                 {
-                    Logger.WriteBarrierLine((i + 1).ToString(), categories[i]);
+                    string displayName = ToolManager.GetCategoryDisplayName(categories[i]);
+                    Logger.WriteBarrierLine((i + 1).ToString(), displayName);
                 }
 
                 Logger.WriteBarrierLine("M", "Manage Tools");
@@ -294,10 +295,11 @@ namespace Fish_Tools
             Console.Clear();
             Logger.PrintArt();
 
-            var categories = ToolManager.GetCategories();
+            var categories = ToolManager.GetCategoriesOrdered();
             foreach (var category in categories)
             {
-                Logger.Info($"=== {category} ===");
+                string displayName = ToolManager.GetCategoryDisplayName(category);
+                Logger.Info($"=== {displayName} ===");
                 var tools = ToolManager.GetToolsByCategory(category);
                 foreach (var tool in tools)
                 {
@@ -402,7 +404,7 @@ namespace Fish_Tools
             Console.Clear();
             Logger.PrintArt();
 
-            var categories = ToolManager.GetCategories();
+            var categories = ToolManager.GetCategoriesOrdered();
             if (categories.Count == 0)
             {
                 Logger.Warn("No categories found.");
@@ -416,7 +418,8 @@ namespace Fish_Tools
             {
                 var tools = ToolManager.GetToolsByCategory(categories[i]);
                 int enabledCount = tools.Count(t => t.IsEnabled);
-                Logger.WriteBarrierLine((i + 1).ToString(), $"{categories[i]} ({enabledCount}/{tools.Count} enabled)");
+                string displayName = ToolManager.GetCategoryDisplayName(categories[i]);
+                Logger.WriteBarrierLine((i + 1).ToString(), $"{displayName} ({enabledCount}/{tools.Count} enabled)");
             }
 
             Logger.WriteBarrierLine("0", "Back");

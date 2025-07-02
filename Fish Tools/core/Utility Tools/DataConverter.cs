@@ -1,3 +1,9 @@
+/*
+------------------------------------------------------------
+Made By notfishvr
+github: https://github.com/official-notfishvr/Fish-Tools
+------------------------------------------------------------
+*/
 using System;
 using System.IO;
 using System.Text;
@@ -10,7 +16,7 @@ namespace Fish_Tools.core.MiscTools
     internal class DataConverter : ITool
     {
         public string Name => "Data Converter";
-        public string Category => "Misc Tools";
+        public string Category => "Utility Tools";
         public bool IsEnabled { get; set; } = true;
         public string Description => "Convert between different data formats (JSON, XML, CSV, Base64, etc.)";
 

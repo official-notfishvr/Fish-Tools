@@ -1,3 +1,9 @@
+/*
+------------------------------------------------------------
+Made By notfishvr
+github: https://github.com/official-notfishvr/Fish-Tools
+------------------------------------------------------------
+*/
 using System;
 using System.Diagnostics;
 using System.Management;
@@ -9,7 +15,7 @@ namespace Fish_Tools.core.MiscTools
     internal class SystemMonitor : ITool
     {
         public string Name => "System Monitor";
-        public string Category => "Misc Tools";
+        public string Category => "Network & System Tools";
         public bool IsEnabled { get; set; } = true;
         public string Description => "Real-time system monitoring with CPU, memory, disk, and network stats";
 

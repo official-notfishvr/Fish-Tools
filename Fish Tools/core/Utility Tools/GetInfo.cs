@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+------------------------------------------------------------
+Made By notfishvr
+github: https://github.com/official-notfishvr/Fish-Tools
+------------------------------------------------------------
+*/
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,7 +15,7 @@ namespace Fish_Tools.core.Misc_Tools
     internal class GetInfo : ITool
     {
         public string Name => "Get Info";
-        public string Category => "Misc Tools";
+        public string Category => "Utility Tools";
         public bool IsEnabled { get; set; } = true;
         public string Description => "Extract and organize information from credential files";
 
