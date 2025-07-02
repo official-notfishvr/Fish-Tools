@@ -224,12 +224,28 @@ namespace Fish_Tools.core.MiscTools.AccountChecker.Checkers
                                             if (gamesResponse.IsSuccessStatusCode)
                                             {
                                                 var gamesContent = await gamesResponse.Content.ReadAsStringAsync();
-                                                var gameCountMatch = Regex.Match(gamesContent, @"<gameCount>(\d+)</gameCount>");
-                                                
-                                                if (gameCountMatch.Success)
+                                                //logger.Info($"Raw games XML: {gamesContent}");
+                                                var gameNameMatches = Regex.Matches(gamesContent, @"<name><!\[CDATA\[(.*?)\]\]></name>");
+                                                if (gameNameMatches.Count > 0)
                                                 {
-                                                    string gameCount = gameCountMatch.Groups[1].Value;
-                                                    detailedInfo += $" | Games: {gameCount}";
+                                                    var gameNames = gameNameMatches.Cast<Match>().Select(m => m.Groups[1].Value).ToList();
+                                                    var displayedGames = gameNames.Take(10);
+                                                    detailedInfo += $" | Games ({gameNames.Count}): {string.Join(", ", displayedGames)}";
+                                                    if (gameNames.Count > 10)
+                                                        detailedInfo += ", ...";
+                                                }
+                                                else
+                                                {
+                                                    var gameCountMatch = Regex.Match(gamesContent, @"<gameCount>(\\d+)</gameCount>");
+                                                    if (gameCountMatch.Success)
+                                                    {
+                                                        string gameCount = gameCountMatch.Groups[1].Value;
+                                                        detailedInfo += $" | Games: {gameCount}";
+                                                    }
+                                                    else
+                                                    {
+                                                        detailedInfo += " | Games: (private or none)";
+                                                    }
                                                 }
                                             }
                                         }

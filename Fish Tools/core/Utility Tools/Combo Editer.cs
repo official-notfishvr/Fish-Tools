@@ -60,6 +60,10 @@ namespace Fish_Tools.core.MiscTools
                 logger.WriteBarrierLine("1", "Remove Spaces");
                 logger.WriteBarrierLine("2", "Remove That Is Not email:pass");
                 logger.WriteBarrierLine("3", "Add ':' After email");
+                logger.WriteBarrierLine("4", "Remove Duplicates");
+                logger.WriteBarrierLine("5", "Sort Combos");
+                logger.WriteBarrierLine("6", "Count Combos");
+                logger.WriteBarrierLine("7", "Show Sample Combos");
                 logger.WriteBarrierLine("9", "Save Combos");
                 logger.WriteBarrierLine("0", "Back");
                 Console.Write("-> ");
@@ -90,6 +94,65 @@ namespace Fish_Tools.core.MiscTools
                         string fileContent = File.ReadAllText(_combosPath);
                         string updatedContent = fileContent.Replace(".com", ".com:");
                         logger.Success("add ':' After email.");
+                        Console.ReadKey();
+                        ComboEditorMain(logger);
+                        break;
+                    case ConsoleKey.D4:
+                        if (_combos != null)
+                        {
+                            int before = _combos.Length;
+                            _combos = _combos.Distinct().ToArray();
+                            int after = _combos.Length;
+                            Console.WriteLine();
+                            logger.Success($"Removed duplicates. {before - after} duplicates removed.");
+                        }
+                        else
+                        {
+                            logger.Error("No combos loaded.");
+                        }
+                        Console.ReadKey();
+                        ComboEditorMain(logger);
+                        break;
+                    case ConsoleKey.D5:
+                        if (_combos != null)
+                        {
+                            _combos = _combos.OrderBy(x => x).ToArray();
+                            Console.WriteLine();
+                            logger.Success("Combos sorted alphabetically.");
+                        }
+                        else
+                        {
+                            logger.Error("No combos loaded.");
+                        }
+                        Console.ReadKey();
+                        ComboEditorMain(logger);
+                        break;
+                    case ConsoleKey.D6:
+                        if (_combos != null)
+                        {
+                            logger.Info($"Total combos loaded: {_combos.Length}");
+                        }
+                        else
+                        {
+                            logger.Error("No combos loaded.");
+                        }
+                        Console.ReadKey();
+                        ComboEditorMain(logger);
+                        break;
+                    case ConsoleKey.D7:
+                        if (_combos != null && _combos.Length > 0)
+                        {
+                            logger.Info("Sample combos:");
+                            int count = Math.Min(5, _combos.Length);
+                            for (int i = 0; i < count; i++)
+                            {
+                                Console.WriteLine($"{i + 1}: {_combos[i]}");
+                            }
+                        }
+                        else
+                        {
+                            logger.Error("No combos loaded.");
+                        }
                         Console.ReadKey();
                         ComboEditorMain(logger);
                         break;
