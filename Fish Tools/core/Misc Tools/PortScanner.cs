@@ -19,41 +19,52 @@ namespace Fish_Tools.core.MiscTools
             Logger.PrintArt();
             
             Logger.Info("Port Scanner - Network Port Detection Tool");
-            Logger.Info("This tool scans for open ports on a target host.");
+            Logger.Info("This tool scans for open ports on your local machine.");
             
-            Console.Write("Enter target hostname or IP address: ");
-            string target = Console.ReadLine();
-            
+            string target = GetLocalIPv4();
             if (string.IsNullOrEmpty(target))
             {
-                Logger.Error("Invalid target specified.");
+                Logger.Error("Could not determine local IP address.");
                 Logger.Info("Press any key to return to menu...");
                 Console.ReadKey();
                 return;
             }
-            
-            Console.Write("Enter start port (default 1): ");
-            string startPortStr = Console.ReadLine();
-            int startPort = string.IsNullOrEmpty(startPortStr) ? 1 : int.Parse(startPortStr);
-            
-            Console.Write("Enter end port (default 1024): ");
-            string endPortStr = Console.ReadLine();
-            int endPort = string.IsNullOrEmpty(endPortStr) ? 1024 : int.Parse(endPortStr);
-            
-            Console.Write("Enter timeout in milliseconds (default 1000): ");
-            string timeoutStr = Console.ReadLine();
-            int timeout = string.IsNullOrEmpty(timeoutStr) ? 1000 : int.Parse(timeoutStr);
-            
+            Logger.Info($"Automatically detected local IP: {target}");
+            int startPort = 1;
+            int endPort = 1024;
+            int timeout = 1000;
             Logger.Info($"Starting port scan on {target} from port {startPort} to {endPort}...");
             Logger.Info("This may take a while depending on the range...");
-            
-            ScanPorts(target, startPort, endPort, timeout, Logger);
-            
+            ScanPorts(target, startPort, endPort, timeout, Logger).GetAwaiter().GetResult();
             Logger.Info("Press any key to return to menu...");
             Console.ReadKey();
         }
 
-        private async void ScanPorts(string target, int startPort, int endPort, int timeout, Logger Logger)
+        private string GetLocalIPv4()
+        {
+            try
+            {
+                foreach (var ni in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    if (ni.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up &&
+                        ni.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback)
+                    {
+                        var ipProps = ni.GetIPProperties();
+                        foreach (var addr in ipProps.UnicastAddresses)
+                        {
+                            if (addr.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                            {
+                                return addr.Address.ToString();
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+            return null;
+        }
+
+        private async Task ScanPorts(string target, int startPort, int endPort, int timeout, Logger Logger)
         {
             var openPorts = new List<int>();
             var tasks = new List<Task>();
