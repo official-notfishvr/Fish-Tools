@@ -50,7 +50,7 @@ namespace Fish_Tools
         {
             if (!IsTitleUpdated)
             {
-                Utils.NewThread(Update);
+                //Utils.NewThread(Update);
                 IsTitleUpdated = true;
             }
 
@@ -82,7 +82,12 @@ namespace Fish_Tools
                 var keyInfo = Console.ReadKey();
                 var input = keyInfo.KeyChar.ToString().ToUpper();
 
-                if (input == "Q")
+                if (keyInfo.Key == ConsoleKey.Enter || keyInfo.KeyChar == '\r' || keyInfo.KeyChar == '\n')
+                {
+                    Console.WriteLine();
+                    continue;
+                }
+                else if (input == "Q")
                 {
                     Console.WriteLine();
                     Logger.Info("Exiting application. Goodbye!");
@@ -171,7 +176,12 @@ namespace Fish_Tools
                 var keyInfo = Console.ReadKey();
                 var input = keyInfo.KeyChar.ToString();
 
-                if (char.IsDigit(keyInfo.KeyChar))
+                if (keyInfo.Key == ConsoleKey.Enter || keyInfo.KeyChar == '\r' || keyInfo.KeyChar == '\n')
+                {
+                    Console.WriteLine();
+                    continue;
+                }
+                else if (char.IsDigit(keyInfo.KeyChar))
                 {
                     var restOfInput = "";
                     var startTime = DateTime.Now;
@@ -264,6 +274,11 @@ namespace Fish_Tools
                 var input = keyInfo.KeyChar.ToString();
                 Console.WriteLine();
 
+                if (keyInfo.Key == ConsoleKey.Enter || keyInfo.KeyChar == '\r' || keyInfo.KeyChar == '\n')
+                {
+                    continue;
+                }
+
                 switch (input)
                 {
                     case "1":
@@ -343,7 +358,12 @@ namespace Fish_Tools
             var keyInfo = Console.ReadKey();
             var input = keyInfo.KeyChar.ToString();
 
-            if (char.IsDigit(keyInfo.KeyChar))
+            if (keyInfo.Key == ConsoleKey.Enter || keyInfo.KeyChar == '\r' || keyInfo.KeyChar == '\n')
+            {
+                Console.WriteLine();
+                return;
+            }
+            else if (char.IsDigit(keyInfo.KeyChar))
             {
                 var restOfInput = "";
                 var startTime = DateTime.Now;
@@ -427,7 +447,12 @@ namespace Fish_Tools
             var keyInfo = Console.ReadKey();
             var input = keyInfo.KeyChar.ToString();
 
-            if (char.IsDigit(keyInfo.KeyChar))
+            if (keyInfo.Key == ConsoleKey.Enter || keyInfo.KeyChar == '\r' || keyInfo.KeyChar == '\n')
+            {
+                Console.WriteLine();
+                return;
+            }
+            else if (char.IsDigit(keyInfo.KeyChar))
             {
                 var restOfInput = "";
                 var startTime = DateTime.Now;

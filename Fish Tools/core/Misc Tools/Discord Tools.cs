@@ -5,8 +5,6 @@ github: https://github.com/official-notfishvr/Fish-Tools
 ------------------------------------------------------------
 */
 using Fish_Tools.core.Utils;
-using Discord.Gateway;
-using Discord;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
 using static Fish_Tools.core.Utils.Settings.Config;
@@ -27,72 +25,67 @@ namespace Fish_Tools.core.DiscordTools
         public bool IsEnabled { get; set; } = true;
         public string Description => "Discord automation and management tools";
 
-        public static DiscordSocketClient client = new DiscordSocketClient();
         public static string token;
         public static string username;
-        public static List<BotGuild> BotGuilds = new List<BotGuild>();
-        public static DiscordUser usr = new DiscordUser();
-        public struct BotGuild
-        {
-            public DiscordGuild Guild { get; }
-            public ulong Id => Guild.Id;
-            public BotGuild(DiscordGuild gld) { Guild = gld; }
-            public override string ToString() { return Guild.Name; }
-        }
+        public static string userId;
+        public static bool isLoggedIn = false;
+        public static HttpClient httpClient = new HttpClient();
 
         public void Main(Logger Logger)
         {
             DiscordToolsMenu(Logger).Wait();
         }
 
-        public static void Login(string token, Logger Logger)
+        public static async Task<bool> Login(string token, Logger Logger)
         {
             try
             {
-                client.OnLoggedIn += (sender, args) => client_OnLoggedIn(sender, args, Logger);
-                client.OnLoggedOut += (sender, args) => client_OnLoggedOut(sender, args, Logger);
-                client.OnGuildUpdated += (sender, args) => client_OnGuildUpdated(sender, args, Logger);
+                httpClient.DefaultRequestHeaders.Clear();
+                httpClient.DefaultRequestHeaders.Add("Authorization", token);
+                httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
 
-                client.Login(token);
+                var response = await httpClient.GetAsync("https://discord.com/api/v9/users/@me");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var userData = await response.Content.ReadAsStringAsync();
+                    var user = JsonConvert.DeserializeObject<DiscordUser>(userData);
+                    
+                    username = user.username;
+                    userId = user.id;
+                    isLoggedIn = true;
+                    
+                    Logger.Success($"Username: {username}");
+                    Logger.Success("Logged In");
+                    
+                    Config.ConfigData configData = new Config.ConfigData
+                    {
+                        Discord = new Config.DiscordConfig
+                        {
+                            Username = username,
+                            Token = token,
+                        },
+                    };
+
+                    Config.SaveConfig(configData);
+                    return true;
+                }
+                else
+                {
+                    Logger.Error($"Login failed: {response.StatusCode}");
+                    return false;
+                }
             }
             catch (Exception err)
             {
-                Console.WriteLine(err.Message);
+                Logger.Error($"Login error: {err.Message}");
                 token = "";
                 username = "";
+                isLoggedIn = false;
+                return false;
             }
         }
-        private static void client_OnLoggedIn(DiscordSocketClient client, LoginEventArgs args, Logger Logger)
-        {
-            try
-            {
-                Logger.Success("Username: " + client.User.Username);
-                username = client.User.Username;
-                Logger.Success("Logged In");
-                Config.ConfigData configData = new Config.ConfigData
-                {
-                    Discord = new Config.DiscordConfig
-                    {
-                        Username = username,
-                        Token = token,
-                    },
-                };
 
-                Config.SaveConfig(configData);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error($"Error during OnLoggedIn: {ex.Message}");
-                token = "";
-            }
-        }
-        public static Task client_OnGuildUpdated(DiscordClient sender, GuildEventArgs e, Logger Logger)
-        {
-            Logger.Write($"Guild available: {e.Guild.Name} (ID: {e.Guild.Id})");
-            BotGuilds.Add(new BotGuild(e.Guild));
-            return Task.CompletedTask;
-        }
-        private static void client_OnLoggedOut(DiscordSocketClient client, LogoutEventArgs args, Logger Logger) { }
         public static async Task DiscordToolsMenu(Logger Logger)
         {
             LoadConfig();
@@ -100,7 +93,7 @@ namespace Fish_Tools.core.DiscordTools
             if (!string.IsNullOrEmpty(Config.Data?.Discord?.Token))
             {
                 token = Config.Data.Discord.Token;
-                Login(token, Logger);
+                await Login(token, Logger);
             }
             else
             {
@@ -110,7 +103,7 @@ namespace Fish_Tools.core.DiscordTools
                 Logger.Write("Put In Token");
                 Console.Write("-> ");
                 token = Console.ReadLine();
-                Login(token, Logger);
+                await Login(token, Logger);
             }
 
             Console.Clear();
@@ -119,6 +112,8 @@ namespace Fish_Tools.core.DiscordTools
             Logger.WriteBarrierLine("1", "Scrape Groups");
             Logger.WriteBarrierLine("2", "Messages");
             Logger.WriteBarrierLine("3", "Discord UserLookUp");
+            Logger.WriteBarrierLine("4", "Get User Info");
+            Logger.WriteBarrierLine("5", "Get Guilds");
             Logger.WriteBarrierLine("0", "Back");
             Console.Write("-> ");
             ConsoleKey choice = Console.ReadKey().Key;
@@ -142,24 +137,22 @@ namespace Fish_Tools.core.DiscordTools
                     string UserID = Console.ReadLine();
                     if (ulong.TryParse(UserID, out _))
                     {
-                        using (WebClient web = new WebClient())
-                        {
-                            web.Headers.Add(HttpRequestHeader.Authorization, "Bot " + GetToken());
-                            string data = web.DownloadString($"https://discord.com/api/v8/users/{UserID}");
-
-                            DiscordUser usr = System.Text.Json.JsonSerializer.Deserialize<DiscordUser>(data);
-                            usr.avatar = $"https://cdn.discordapp.com/avatars/{usr.id}/{usr.avatar}";
-                            usr.ConvertedFlags = CalculateUserFlags(usr.public_flags);
-                            Logger.Success($"ID: {usr.id}");
-                            Logger.Success($"Username: {usr.username}#{usr.discriminator}");
-                            Logger.Success($"User Flags: {usr.ConvertedFlags}");
-                            Console.ReadKey();
-                        }
+                        await LookupUser(UserID, Logger);
                     }
                     else
                     {
                         Logger.Error("That isn't a valid Discord User ID!");
                     }
+                    break;
+                case ConsoleKey.D4:
+                    Console.Clear();
+                    Logger.PrintArt();
+                    await GetCurrentUserInfo(Logger);
+                    break;
+                case ConsoleKey.D5:
+                    Console.Clear();
+                    Logger.PrintArt();
+                    await GetGuilds(Logger);
                     break;
                 case ConsoleKey.D0:
                     return;
@@ -167,6 +160,7 @@ namespace Fish_Tools.core.DiscordTools
             Console.WriteLine();
             await DiscordToolsMenu(Logger);
         }
+
         public static async Task SendMessage(Logger Logger)
         {
             try
@@ -175,8 +169,8 @@ namespace Fish_Tools.core.DiscordTools
                 Console.Title = "Fish Tools";
                 Logger.PrintArt();
                 Logger.WriteBarrierLine("1", "Send Message With Token");
-                Logger.WriteBarrierLine("2", "Send Webook Message");
-                Logger.WriteBarrierLine("3", "Delete Webook");
+                Logger.WriteBarrierLine("2", "Send Webhook Message");
+                Logger.WriteBarrierLine("3", "Delete Webhook");
                 Console.Write("-> ");
                 ConsoleKey choice = Console.ReadKey().Key;
                 switch (choice)
@@ -194,14 +188,10 @@ namespace Fish_Tools.core.DiscordTools
 
                         if (!int.TryParse(threadInput, out int threadCount)) { Logger.Error("Invalid thread count. Please enter a valid number."); return; }
 
-                        HttpClient client = new HttpClient();
-                        client.DefaultRequestHeaders.Clear();
-                        client.DefaultRequestHeaders.Add("Authorization", token);
-
                         for (int i = 0; i < threadCount; i++)
                         {
-                            var data = new { session_id = "", content = $"{message}" };
-                            var response = await client.PostAsJsonAsync($"https://discord.com/api/v9/channels/{channelId}/messages", data);
+                            var data = new { content = $"{message}" };
+                            var response = await httpClient.PostAsJsonAsync($"https://discord.com/api/v9/channels/{channelId}/messages", data);
 
                             if (response.IsSuccessStatusCode)
                             {
@@ -267,6 +257,7 @@ namespace Fish_Tools.core.DiscordTools
             }
             catch (Exception e) { Logger.Error($"Error: {e}"); }
         }
+
         public static async Task ScrapeGroups(Logger logger)
         {
             Console.Clear();
@@ -280,56 +271,171 @@ namespace Fish_Tools.core.DiscordTools
                 Console.Clear();
                 Console.WriteLine();
 
-                var groups = await client.GetPrivateChannelsAsync();
-                Console.WriteLine();
                 logger.Write("Scraping groups...");
 
-                List<object> groupInfoList = new List<object>();
-
-                foreach (var group in groups)
+                var response = await httpClient.GetAsync("https://discord.com/api/v9/users/@me/channels");
+                
+                if (response.IsSuccessStatusCode)
                 {
-                    if (group.Type == ChannelType.Group)
+                    var channelsData = await response.Content.ReadAsStringAsync();
+                    var channels = JsonConvert.DeserializeObject<List<DiscordChannel>>(channelsData);
+                    
+                    List<object> groupInfoList = new List<object>();
+
+                    foreach (var channel in channels)
                     {
-                        string groupName = string.IsNullOrEmpty(group.Name) ? "No Name" : group.Name;
-                        logger.Warn($"Group ID: {group.Id}");
-                        logger.Warn($"Group Name: {groupName}");
+                        if (channel.type == 3) // Group DM type
+                        {
+                            string groupName = string.IsNullOrEmpty(channel.name) ? "No Name" : channel.name;
+                            logger.Warn($"Group ID: {channel.id}");
+                            logger.Warn($"Group Name: {groupName}");
 
-                        groupInfoList.Add(new { GroupId = group.Id, GroupName = groupName });
+                            groupInfoList.Add(new { GroupId = channel.id, GroupName = groupName });
+                        }
                     }
-                }
 
-                if (groupInfoList.Count > 0)
-                {
-                    string dataDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
-                    if (!Directory.Exists(dataDirectory)) { Directory.CreateDirectory(dataDirectory);}
-                    string json = JsonConvert.SerializeObject(groupInfoList, Formatting.Indented);
-                    string filePath = Path.Combine(dataDirectory, "groupInfo.json");
-                    File.WriteAllText(filePath, json);
+                    if (groupInfoList.Count > 0)
+                    {
+                        string dataDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
+                        if (!Directory.Exists(dataDirectory)) { Directory.CreateDirectory(dataDirectory);}
+                        string json = JsonConvert.SerializeObject(groupInfoList, Formatting.Indented);
+                        string filePath = Path.Combine(dataDirectory, "groupInfo.json");
+                        File.WriteAllText(filePath, json);
+                        logger.Success($"Saved {groupInfoList.Count} groups to groupInfo.json");
+                    }
+                    else { logger.Write("No group channels found."); }
                 }
-                else { logger.Write("No group channels found."); }
+                else
+                {
+                    logger.Error($"Failed to get channels: {response.StatusCode}");
+                }
             }
             catch (Exception ex) { logger.Error($"Error while scraping groups: {ex.Message}"); }
 
             Console.ReadKey();
             await DiscordToolsMenu(logger);
         }
+
+        public static async Task GetCurrentUserInfo(Logger Logger)
+        {
+            try
+            {
+                var response = await httpClient.GetAsync("https://discord.com/api/v9/users/@me");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var userData = await response.Content.ReadAsStringAsync();
+                    var user = JsonConvert.DeserializeObject<DiscordUser>(userData);
+                    
+                    Logger.Success($"ID: {user.id}");
+                    Logger.Success($"Username: {user.username}#{user.discriminator}");
+                    Logger.Success($"Email: {user.email}");
+                    Logger.Success($"Phone: {user.phone}");
+                    Logger.Success($"Verified: {user.verified}");
+                    Logger.Success($"MFA Enabled: {user.mfa_enabled}");
+                    Logger.Success($"Locale: {user.locale}");
+                    Logger.Success($"Nitro Type: {user.premium_type}");
+                    Logger.Success($"Flags: {user.flags}");
+                    
+                    if (!string.IsNullOrEmpty(user.avatar))
+                    {
+                        user.avatar = $"https://cdn.discordapp.com/avatars/{user.id}/{user.avatar}";
+                        Logger.Success($"Avatar: {user.avatar}");
+                    }
+                }
+                else
+                {
+                    Logger.Error($"Failed to get user info: {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Error getting user info: {ex.Message}");
+            }
+            
+            Console.ReadKey();
+        }
+
+        public static async Task GetGuilds(Logger Logger)
+        {
+            try
+            {
+                var response = await httpClient.GetAsync("https://discord.com/api/v9/users/@me/guilds");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var guildsData = await response.Content.ReadAsStringAsync();
+                    var guilds = JsonConvert.DeserializeObject<List<DiscordGuild>>(guildsData);
+                    
+                    Logger.Success($"Found {guilds.Count} guilds:");
+                    Console.WriteLine();
+                    
+                    foreach (var guild in guilds)
+                    {
+                        Logger.Write($"Guild: {guild.name} (ID: {guild.id})");
+                        Logger.Write($"Owner: {guild.owner}");
+                        Logger.Write($"Permissions: {guild.permissions}");
+                        Console.WriteLine();
+                    }
+                }
+                else
+                {
+                    Logger.Error($"Failed to get guilds: {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Error getting guilds: {ex.Message}");
+            }
+            
+            Console.ReadKey();
+        }
+
         #region Userid Look up
+        public static async Task LookupUser(string userId, Logger Logger)
+        {
+            try
+            {
+                using (WebClient web = new WebClient())
+                {
+                    web.Headers.Add(HttpRequestHeader.Authorization, "Bot " + GetToken());
+                    string data = web.DownloadString($"https://discord.com/api/v8/users/{userId}");
+
+                    DiscordUser usr = JsonConvert.DeserializeObject<DiscordUser>(data);
+                    usr.avatar = $"https://cdn.discordapp.com/avatars/{usr.id}/{usr.avatar}";
+                    usr.ConvertedFlags = CalculateUserFlags(usr.public_flags);
+                    Logger.Success($"ID: {usr.id}");
+                    Logger.Success($"Username: {usr.username}#{usr.discriminator}");
+                    Logger.Success($"User Flags: {usr.ConvertedFlags}");
+                    Console.ReadKey();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Error looking up user: {ex.Message}");
+                Console.ReadKey();
+            }
+        }
+
         public static string GetToken()
         {
             string tkns = "eyJ0b2tlbnMiOlsiT0RVeE1ETTNOVFk1TkRRNE9EQTBNelV5LllMeWNnQS5XdU1xaUR6d1lBZnBQMm9tVmM1aEZEcV9PbDQiLCJPRFV4TURRMU56a3hOREF4TVRFMU5qVTQuWUx5a0tBLmxyOEIxaXJncW15dWwyQ0t3LWNtVkhKbjdlbyIsIk9EVXhNRFExT1RFNU5qazNNREV3TmpnNC5ZTHlrUmcuZ0IwWlBhaDhtdGl2ZnBjaVRRbUdQbWdjVTBNIl19";
-            string[] tokens = System.Text.Json.JsonSerializer.Deserialize<Token>(Base64Decode(tkns)).tokens;
+            string[] tokens = JsonConvert.DeserializeObject<Token>(Base64Decode(tkns)).tokens;
 
             return tokens[new Random().Next(0, tokens.Length)];
         }
+        
         public static string Base64Decode(string base64EncodedData)
         {
             var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
             return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
         }
+        
         public class Token
         {
             public string[] tokens { get; set; }
         }
+        
         public class DiscordUser
         {
             public string id { get; set; }
@@ -338,7 +444,30 @@ namespace Fish_Tools.core.DiscordTools
             public string discriminator { get; set; }
             public int public_flags { get; set; }
             public string ConvertedFlags { get; set; }
+            public string email { get; set; }
+            public string phone { get; set; }
+            public bool verified { get; set; }
+            public bool mfa_enabled { get; set; }
+            public string locale { get; set; }
+            public int premium_type { get; set; }
+            public int flags { get; set; }
         }
+
+        public class DiscordChannel
+        {
+            public string id { get; set; }
+            public int type { get; set; }
+            public string name { get; set; }
+        }
+
+        public class DiscordGuild
+        {
+            public string id { get; set; }
+            public string name { get; set; }
+            public bool owner { get; set; }
+            public string permissions { get; set; }
+        }
+        
         private static string CalculateUserFlags(int number)
         {
             // https://discord.com/developers/docs/resources/user#user-object-user-flags
