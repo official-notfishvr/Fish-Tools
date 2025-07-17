@@ -27,7 +27,7 @@ namespace Fish_Tools
 
         public static bool ApplicationConfigurationInitialize = false;
         public static bool IsTitleUpdated = false;
-        private static string CurrentVersion = "2.4";
+        private static string CurrentVersion = "3.0";
         private static readonly string VersionUrl = "https://raw.githubusercontent.com/official-notfishvr/Fish-Tools/refs/heads/main/version";
         public static string dataDir = "";
         /// <summary>
