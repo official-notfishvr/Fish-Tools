@@ -12,10 +12,10 @@ internal sealed class Il2CppCleanerTool : ITool
     public Task RunAsync(ToolContext context)
     {
         ConsoleUi.ResetScreen(Name);
-        
+
         string filePath = ConsoleUi.PromptRequired("Enter path to il2cpp.h file");
         filePath = filePath.Trim('"', '\'');
-        
+
         string absolutePath = Path.GetFullPath(filePath);
         if (!File.Exists(absolutePath))
         {
@@ -46,18 +46,18 @@ internal sealed class Il2CppCleanerTool : ITool
         content = Regex.Replace(content, @"\* DELETE;", "* _DELETE;");
         content = Regex.Replace(content, @"\* IN;", "* _IN;");
         content = Regex.Replace(content, @"\* NULL;", "* _NULL;");
-        
+
         content = Regex.Replace(content, @"\* FAR;", "* _FAR;");
         content = Regex.Replace(content, @"\* NEAR;", "* _NEAR;");
         content = Regex.Replace(content, @"\* OUT;", "* _OUT;");
-        
+
         content = content.Replace("int32_t __int32;", "int32_t m_int32;");
         content = content.Replace("int32_t _int32;", "int32_t m_int32;");
 
         ConsoleUi.Info("Writing output...");
         File.WriteAllText(absolutePath, content);
         ConsoleUi.Success("il2cpp.h successfully cleaned.");
-        
+
         ConsoleUi.Pause();
         return Task.CompletedTask;
     }

@@ -8,7 +8,7 @@ internal sealed class DiscordManager : ITool
     public string Id => "discord-manager";
     public string Name => "Discord Manager";
     public string Category => ToolCategories.SocialWeb;
-    public string Description => "Automate Discord messaging, webhook management, and account profiling.";
+    public string Description => "";
 
     private static readonly HttpClient DiscordHttpClient = new();
     private string? _discordToken;
